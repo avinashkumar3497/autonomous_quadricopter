@@ -24,18 +24,20 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.rosjava_tutorial_pubsub.Talker;
 
+import std_msgs.Bool;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MainActivity extends RosActivity {
 
-  private RosTextView<std_msgs.String> rosTextView;
+  private RosTextView<std_msgs.Bool> left_sensor_trigger, right_sensor_trigger;
   private Talker talker;
 
   public MainActivity() {
     // The RosActivity constructor configures the notification title and ticker
     // messages.
-    super("Pubsub Tutorial", "Pubsub Tutorial");
+    super("Drone data coming", "Drone data coming");
   }
 
   @SuppressWarnings("unchecked")
@@ -43,15 +45,24 @@ public class MainActivity extends RosActivity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    rosTextView = (RosTextView<std_msgs.String>) findViewById(R.id.text);
-    rosTextView.setTopicName("chatter");
-    rosTextView.setMessageType(std_msgs.String._TYPE);
-    rosTextView.setMessageToStringCallable(new MessageCallable<String, std_msgs.String>() {
+    left_sensor_trigger = (RosTextView<Bool>) findViewById(R.id.tv_left_sensor_trigger_val);
+    right_sensor_trigger = (RosTextView<Bool>) findViewById(R.id.tv_right_sensor_trigger_val);
+    left_sensor_trigger.setTopicName("proximitySensorLeftBool");
+    right_sensor_trigger.setTopicName("proximitySensorRightBool");
+    left_sensor_trigger.setMessageType(std_msgs.Bool._TYPE);
+    right_sensor_trigger.setMessageType(std_msgs.Bool._TYPE);
+    left_sensor_trigger.setMessageToStringCallable(new MessageCallable<String, Bool>() {
       @Override
-      public String call(std_msgs.String message) {
-        return message.getData();
+      public String call(std_msgs.Bool message) {
+        return String.valueOf(message.getData());
       }
     });
+    right_sensor_trigger.setMessageToStringCallable(new MessageCallable<String, Bool>() {
+          @Override
+          public String call(std_msgs.Bool message) {
+              return String.valueOf(message.getData());
+          }
+      });
   }
 
   @Override
@@ -68,6 +79,8 @@ public class MainActivity extends RosActivity {
     nodeMainExecutor.execute(talker, nodeConfiguration);
     // The RosTextView is also a NodeMain that must be executed in order to
     // start displaying incoming messages.
-    nodeMainExecutor.execute(rosTextView, nodeConfiguration);
+    nodeMainExecutor.execute(left_sensor_trigger, nodeConfiguration);
+    nodeConfiguration.setNodeName("right_sensor_trigger");
+    nodeMainExecutor.execute(right_sensor_trigger, nodeConfiguration);
   }
 }
