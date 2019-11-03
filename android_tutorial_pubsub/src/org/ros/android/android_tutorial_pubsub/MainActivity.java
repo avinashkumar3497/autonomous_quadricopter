@@ -17,6 +17,7 @@
 package org.ros.android.android_tutorial_pubsub;
 
 import android.os.Bundle;
+import android.renderscript.Float2;
 
 import org.ros.android.BitmapFromImage;
 import org.ros.android.MessageCallable;
@@ -29,6 +30,8 @@ import org.ros.rosjava_tutorial_pubsub.Talker;
 
 import sensor_msgs.Image;
 import std_msgs.Bool;
+import std_msgs.Float32;
+import std_msgs.Float64;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -36,6 +39,7 @@ import std_msgs.Bool;
 public class MainActivity extends RosActivity {
 
   private RosTextView<std_msgs.Bool> left_sensor_trigger, right_sensor_trigger;
+  private RosTextView<std_msgs.Float32> left_sensor_distance, right_sensor_distance;
   private RosImageView vision_sensor;
   private Talker talker;
 
@@ -53,12 +57,18 @@ public class MainActivity extends RosActivity {
     vision_sensor = (RosImageView<sensor_msgs.Image>) findViewById(R.id.riv_vision_sensor);
     left_sensor_trigger = (RosTextView<Bool>) findViewById(R.id.tv_left_sensor_trigger_val);
     right_sensor_trigger = (RosTextView<Bool>) findViewById(R.id.tv_right_sensor_trigger_val);
+    left_sensor_distance = (RosTextView<Float32>) findViewById(R.id.tv_left_sensor_distance_val);
+    right_sensor_distance = (RosTextView<Float32>) findViewById(R.id.tv_right_sensor_distance_val);
     vision_sensor.setTopicName("frontVisionSensor");
     left_sensor_trigger.setTopicName("proximitySensorLeftBool");
     right_sensor_trigger.setTopicName("proximitySensorRightBool");
+    left_sensor_distance.setTopicName("proximitySensorLeftDistance");
+    right_sensor_distance.setTopicName("proximitySensorRightDistance");
     vision_sensor.setMessageType(sensor_msgs.Image._TYPE);
     left_sensor_trigger.setMessageType(std_msgs.Bool._TYPE);
     right_sensor_trigger.setMessageType(std_msgs.Bool._TYPE);
+    left_sensor_distance.setMessageType(std_msgs.Float32._TYPE);
+    right_sensor_distance.setMessageType(std_msgs.Float32._TYPE);
     vision_sensor.setMessageToBitmapCallable(new BitmapFromImage());
     left_sensor_trigger.setMessageToStringCallable(new MessageCallable<String, Bool>() {
       @Override
@@ -72,7 +82,20 @@ public class MainActivity extends RosActivity {
               return String.valueOf(message.getData());
           }
       });
+      left_sensor_distance.setMessageToStringCallable(new MessageCallable<String, Float32>() {
+          @Override
+          public String call(std_msgs.Float32 message) {
+              return String.valueOf(message.getData());
+          }
+      });
+      right_sensor_distance.setMessageToStringCallable(new MessageCallable<String, Float32>() {
+          @Override
+          public String call(std_msgs.Float32 message) {
+              return String.valueOf(message.getData());
+          }
+      });
   }
+
 
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
@@ -88,11 +111,15 @@ public class MainActivity extends RosActivity {
     nodeMainExecutor.execute(talker, nodeConfiguration);
     // The RosTextView is also a NodeMain that must be executed in order to
     // start displaying incoming messages.
-      nodeConfiguration.setNodeName("vision_sensor");
-      nodeMainExecutor.execute(vision_sensor, nodeConfiguration);
+    nodeConfiguration.setNodeName("vision_sensor");
+    nodeMainExecutor.execute(vision_sensor, nodeConfiguration);
     nodeConfiguration.setNodeName("left_sensor_trigger");
     nodeMainExecutor.execute(left_sensor_trigger, nodeConfiguration);
     nodeConfiguration.setNodeName("right_sensor_trigger");
     nodeMainExecutor.execute(right_sensor_trigger, nodeConfiguration);
+    nodeConfiguration.setNodeName("left_sensor_distance");
+    nodeMainExecutor.execute(left_sensor_distance, nodeConfiguration);
+    nodeConfiguration.setNodeName("right_sensor_distance");
+    nodeMainExecutor.execute(right_sensor_distance, nodeConfiguration);
   }
 }
