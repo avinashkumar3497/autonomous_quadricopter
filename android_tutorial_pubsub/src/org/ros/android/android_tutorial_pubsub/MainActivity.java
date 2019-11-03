@@ -16,6 +16,8 @@
 
 package org.ros.android.android_tutorial_pubsub;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import org.ros.android.BitmapFromImage;
@@ -38,7 +40,7 @@ public class MainActivity extends RosActivity {
 
   private RosTextView<std_msgs.Bool> left_sensor_trigger, right_sensor_trigger;
   private RosTextView<std_msgs.Float32> left_sensor_distance, right_sensor_distance;
-  private RosTextView<Pose> posex,posey,posez;
+  private RosTextView<Pose> posex,posey,posez,orienx,orieny,orienz,orienw;
   private RosImageView vision_sensor;
   private Talker talker;
 
@@ -61,6 +63,10 @@ public class MainActivity extends RosActivity {
     posex = (RosTextView<Pose>) findViewById(R.id.tv_pose_x);
       posey = (RosTextView<Pose>) findViewById(R.id.tv_pose_y);
       posez = (RosTextView<Pose>) findViewById(R.id.tv_pose_z);
+      orienx = (RosTextView<Pose>) findViewById(R.id.tv_orien_x);
+      orieny = (RosTextView<Pose>) findViewById(R.id.tv_orien_y);
+      orienz = (RosTextView<Pose>) findViewById(R.id.tv_orien_z);
+      orienw = (RosTextView<Pose>) findViewById(R.id.tv_orien_w);
     vision_sensor.setTopicName("frontVisionSensor");
     left_sensor_trigger.setTopicName("proximitySensorLeftBool");
     right_sensor_trigger.setTopicName("proximitySensorRightBool");
@@ -69,6 +75,10 @@ public class MainActivity extends RosActivity {
     posex.setTopicName("gpsToROS");
       posey.setTopicName("gpsToROS");
       posez.setTopicName("gpsToROS");
+      orienx.setTopicName("gpsToROS");
+      orieny.setTopicName("gpsToROS");
+      orienz.setTopicName("gpsToROS");
+      orienw.setTopicName("gpsToROS");
     vision_sensor.setMessageType(sensor_msgs.Image._TYPE);
     left_sensor_trigger.setMessageType(std_msgs.Bool._TYPE);
     right_sensor_trigger.setMessageType(std_msgs.Bool._TYPE);
@@ -77,16 +87,25 @@ public class MainActivity extends RosActivity {
     posex.setMessageType(Pose._TYPE);
       posey.setMessageType(Pose._TYPE);
       posez.setMessageType(Pose._TYPE);
+      orienx.setMessageType(Pose._TYPE);
+      orieny.setMessageType(Pose._TYPE);
+      orienz.setMessageType(Pose._TYPE);
+      orienw.setMessageType(Pose._TYPE);
+      final ColorStateList defColor =  left_sensor_trigger.getTextColors();
     vision_sensor.setMessageToBitmapCallable(new BitmapFromImage());
     left_sensor_trigger.setMessageToStringCallable(new MessageCallable<String, Bool>() {
       @Override
       public String call(std_msgs.Bool message) {
+          if(String.valueOf(message.getData())== "true") {left_sensor_trigger.setTextColor(Color.RED); left_sensor_distance.setTextColor(Color.RED);}
+          else {left_sensor_trigger.setTextColor(defColor); left_sensor_distance.setTextColor(defColor);}
         return String.valueOf(message.getData());
       }
     });
     right_sensor_trigger.setMessageToStringCallable(new MessageCallable<String, Bool>() {
           @Override
           public String call(std_msgs.Bool message) {
+              if(String.valueOf(message.getData())== "true") {right_sensor_trigger.setTextColor(Color.RED); right_sensor_distance.setTextColor(Color.RED);}
+              else {right_sensor_trigger.setTextColor(defColor); right_sensor_distance.setTextColor(defColor);}
               return String.valueOf(message.getData());
           }
       });
@@ -118,6 +137,30 @@ public class MainActivity extends RosActivity {
           @Override
           public String call(geometry_msgs.Pose message) {
               return String.valueOf(message.getPosition().getZ());
+          }
+      });
+      orienx.setMessageToStringCallable(new MessageCallable<String, Pose>() {
+          @Override
+          public String call(geometry_msgs.Pose message) {
+              return String.valueOf(message.getOrientation().getX());
+          }
+      });
+      orieny.setMessageToStringCallable(new MessageCallable<String, Pose>() {
+          @Override
+          public String call(geometry_msgs.Pose message) {
+              return String.valueOf(message.getOrientation().getY());
+          }
+      });
+      orienz.setMessageToStringCallable(new MessageCallable<String, Pose>() {
+          @Override
+          public String call(geometry_msgs.Pose message) {
+              return String.valueOf(message.getOrientation().getZ());
+          }
+      });
+      orienw.setMessageToStringCallable(new MessageCallable<String, Pose>() {
+          @Override
+          public String call(geometry_msgs.Pose message) {
+              return String.valueOf(message.getOrientation().getW());
           }
       });
   }
@@ -153,5 +196,13 @@ public class MainActivity extends RosActivity {
       nodeMainExecutor.execute(posey, nodeConfiguration);
       nodeConfiguration.setNodeName("posez");
       nodeMainExecutor.execute(posez, nodeConfiguration);
+      nodeConfiguration.setNodeName("orienx");
+      nodeMainExecutor.execute(orienx, nodeConfiguration);
+      nodeConfiguration.setNodeName("orieny");
+      nodeMainExecutor.execute(orieny, nodeConfiguration);
+      nodeConfiguration.setNodeName("orienz");
+      nodeMainExecutor.execute(orienz, nodeConfiguration);
+      nodeConfiguration.setNodeName("orienw");
+      nodeMainExecutor.execute(orienw, nodeConfiguration);
   }
 }
